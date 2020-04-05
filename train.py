@@ -55,9 +55,9 @@ if __name__ == '__main__':
 
     TASK = __import__(args.task)
 
-    train_data, dev_data, test_data = (TASK.read_train_file(codecs.open(args.training_path, 'r', 'utf8'), word_window=args.word_window),
-                                       TASK.read_train_file(codecs.open(args.dev_path, 'r', 'utf8'), word_window=args.word_window),
-                                       TASK.read_train_file(codecs.open(args.test_path, 'r', 'utf8'), word_window=args.word_window))
+    train_data, dev_data, test_data = (TASK.read_train_file(codecs.open(args.training_path, 'rb', 'utf8'), word_window=args.word_window),
+                                       TASK.read_train_file(codecs.open(args.dev_path, 'rb', 'utf8'), word_window=args.word_window),
+                                       TASK.read_train_file(codecs.open(args.test_path, 'rb', 'utf8'), word_window=args.word_window))
 
     sess = tf.Session()
     model = Model(TASK.scope, sess)

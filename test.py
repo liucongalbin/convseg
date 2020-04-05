@@ -16,12 +16,14 @@ if __name__ == '__main__':
     parser.add_argument('--model_dir', dest='model_dir')
     parser.add_argument('--batch_size', dest='batch_size', type=int)
 
+
+
     args = parser.parse_args()
     TASK = __import__(args.task)
 
-    data_iter = TASK.read_raw_file(codecs.open(args.input, 'r', 'utf8'), args.batch_size)
+    data_iter = TASK.read_raw_file(codecs.open(args.input, 'rb', 'utf8'), args.batch_size)
 
-    fout = codecs.open(args.output, 'w', 'utf8')
+    fout = codecs.open(args.output, 'wb', 'utf8')
 
     config = tf.ConfigProto()
     config.gpu_options.allow_growth = True

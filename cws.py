@@ -1,6 +1,6 @@
 from __future__ import print_function
 import os, codecs
-from itertools import izip
+# from itertools import izip
 from tagger import data_iterator
 
 
@@ -22,10 +22,10 @@ def process_train_sentence(sentence, bigram, word_window):
     ret.append(chars)
     if bigram:
         chars = ['', ''] + chars + ['', '']
-        ret.append([a + b if a and b else '' for a, b in zip(chars[:-4], chars[1:])])
-        ret.append([a + b if a and b else '' for a, b in zip(chars[1:-3], chars[2:])])
-        ret.append([a + b if a and b else '' for a, b in zip(chars[2:-2], chars[3:])])
-        ret.append([a + b if a and b else '' for a, b in zip(chars[3:-1], chars[4:])])
+        ret.append([a + b if a and b else '' for a, b in list(zip(chars[:-4], chars[1:]))])
+        ret.append([a + b if a and b else '' for a, b in list(zip(chars[1:-3], chars[2:]))])
+        ret.append([a + b if a and b else '' for a, b in list(zip(chars[2:-2], chars[3:]))])
+        ret.append([a + b if a and b else '' for a, b in list(zip(chars[3:-1], chars[4:]))])
     elif word_window > 0:
         chars = ['', '', ''] + chars + ['', '', '']
         # single char
@@ -33,26 +33,26 @@ def process_train_sentence(sentence, bigram, word_window):
             ret.append(chars[3:-3])
         if word_window >= 2:
             # bi chars
-            ret.append([a + b if a and b else '' for a, b in zip(chars[2:], chars[3:-3])])
-            ret.append([a + b if a and b else '' for a, b in zip(chars[3:-3], chars[4:])])
+            ret.append([a + b if a and b else '' for a, b in list(zip(chars[2:], chars[3:-3]))])
+            ret.append([a + b if a and b else '' for a, b in list(zip(chars[3:-3], chars[4:]))])
         if word_window >= 3:
             # tri chars
             ret.append(
-                [a + b + c if a and b and c else '' for a, b, c in zip(chars[1:], chars[2:], chars[3:-3])])
+                [a + b + c if a and b and c else '' for a, b, c in list(zip(chars[1:], chars[2:], chars[3:-3]))])
             ret.append(
-                [a + b + c if a and b and c else '' for a, b, c in zip(chars[2:], chars[3:-3], chars[4:])])
+                [a + b + c if a and b and c else '' for a, b, c in list(zip(chars[2:], chars[3:-3], chars[4:]))])
             ret.append(
-                [a + b + c if a and b and c else '' for a, b, c in zip(chars[3:-3], chars[4:], chars[5:])])
+                [a + b + c if a and b and c else '' for a, b, c in list(zip(chars[3:-3], chars[4:], chars[5:]))])
         if word_window >= 4:
             # four chars
             ret.append([a + b + c + d if a and b and c and d else '' for a, b, c, d in
-                            zip(chars[0:], chars[1:], chars[2:], chars[3:-3])])
+                            list(zip(chars[0:], chars[1:], chars[2:], chars[3:-3]))])
             ret.append([a + b + c + d if a and b and c and d else '' for a, b, c, d in
-                            zip(chars[1:], chars[2:], chars[3:-3], chars[4:])])
+                            list(zip(chars[1:], chars[2:], chars[3:-3], chars[4:]))])
             ret.append([a + b + c + d if a and b and c and d else '' for a, b, c, d in
-                            zip(chars[2:], chars[3:-3], chars[4:], chars[5:])])
+                            list(zip(chars[2:], chars[3:-3], chars[4:], chars[5:]))])
             ret.append([a + b + c + d if a and b and c and d else '' for a, b, c, d in
-                             zip(chars[3:-3], chars[4:], chars[5:], chars[6:])])
+                             list(zip(chars[3:-3], chars[4:], chars[5:], chars[6:]))])
     ret.append(tags)
     return ret
 
@@ -63,10 +63,10 @@ def process_raw_sentence(sentence, bigram, word_window):
     ret = [chars]
     if bigram:
         chars = ['', ''] + chars + ['', '']
-        ret.append([a + b if a and b else '' for a, b in zip(chars[:-4], chars[1:])])
-        ret.append([a + b if a and b else '' for a, b in zip(chars[1:-3], chars[2:])])
-        ret.append([a + b if a and b else '' for a, b in zip(chars[2:-2], chars[3:])])
-        ret.append([a + b if a and b else '' for a, b in zip(chars[3:-1], chars[4:])])
+        ret.append([a + b if a and b else '' for a, b in list(zip(chars[:-4], chars[1:]))])
+        ret.append([a + b if a and b else '' for a, b in list(zip(chars[1:-3], chars[2:]))])
+        ret.append([a + b if a and b else '' for a, b in list((chars[2:-2], chars[3:]))])
+        ret.append([a + b if a and b else '' for a, b in list(zip(chars[3:-1], chars[4:]))])
     elif word_window > 0:
         chars = ['', '', ''] + chars + ['', '', '']
         # single char
@@ -74,26 +74,26 @@ def process_raw_sentence(sentence, bigram, word_window):
             ret.append(chars[3:-3])
         if word_window >= 2:
             # bi chars
-            ret.append([a + b if a and b else '' for a, b in zip(chars[2:], chars[3:-3])])
-            ret.append([a + b if a and b else '' for a, b in zip(chars[3:-3], chars[4:])])
+            ret.append([a + b if a and b else '' for a, b in list(zip(chars[2:], chars[3:-3]))])
+            ret.append([a + b if a and b else '' for a, b in list(zip(chars[3:-3], chars[4:]))])
         if word_window >= 3:
             # tri chars
             ret.append(
-                [a + b + c if a and b and c else '' for a, b, c in zip(chars[1:], chars[2:], chars[3:-3])])
+                [a + b + c if a and b and c else '' for a, b, c in list(zip(chars[1:], chars[2:], chars[3:-3]))])
             ret.append(
-                [a + b + c if a and b and c else '' for a, b, c in zip(chars[2:], chars[3:-3], chars[4:])])
+                [a + b + c if a and b and c else '' for a, b, c in list(zip(chars[2:], chars[3:-3], chars[4:]))])
             ret.append(
-                [a + b + c if a and b and c else '' for a, b, c in zip(chars[3:-3], chars[4:], chars[5:])])
+                [a + b + c if a and b and c else '' for a, b, c in list(zip(chars[3:-3], chars[4:], chars[5:]))])
         if word_window >= 4:
             # four chars
             ret.append([a + b + c + d if a and b and c and d else '' for a, b, c, d in
-                            zip(chars[0:], chars[1:], chars[2:], chars[3:-3])])
+                            list(zip(chars[0:], chars[1:], chars[2:], chars[3:-3]))])
             ret.append([a + b + c + d if a and b and c and d else '' for a, b, c, d in
-                            zip(chars[1:], chars[2:], chars[3:-3], chars[4:])])
+                            list(zip(chars[1:], chars[2:], chars[3:-3], chars[4:]))])
             ret.append([a + b + c + d if a and b and c and d else '' for a, b, c, d in
-                            zip(chars[2:], chars[3:-3], chars[4:], chars[5:])])
+                            list(zip(chars[2:], chars[3:-3], chars[4:], chars[5:]))])
             ret.append([a + b + c + d if a and b and c and d else '' for a, b, c, d in
-                             zip(chars[3:-3], chars[4:], chars[5:], chars[6:])])
+                             list(zip(chars[3:-3], chars[4:], chars[5:], chars[6:]))])
     return ret
 
 
@@ -104,7 +104,7 @@ def read_train_file(fin, bigram=False, word_window=4):
     data = []
     for l in fin:
         data.append(process_train_sentence(l, bigram, word_window))
-    return zip(*data)
+    return list(zip(*data))
 
 
 def read_raw_file(fin, batch_size, bigram=False, word_window=4):
@@ -116,11 +116,11 @@ def read_raw_file(fin, batch_size, bigram=False, word_window=4):
     for i, l in enumerate(fin):
         buffer.append(process_raw_sentence(l, bigram, word_window))
         if i % max_buffer == 0 and i > 0:
-            for b in data_iterator(zip(*buffer), batch_size, shuffle=False):
+            for b in data_iterator(list(zip(*buffer)), batch_size, shuffle=False):
                 yield b
             buffer = []
     if buffer:
-        for b in data_iterator(zip(*buffer), batch_size, shuffle=False):
+        for b in data_iterator(list(zip(*buffer)), batch_size, shuffle=False):
             yield b
 
 
@@ -130,8 +130,8 @@ def read_raw_file_all(fin, bigram=False, word_window=4):
     """
     data = []
     for b in read_raw_file(fin, 1000, bigram, word_window):
-        data.extend(zip(*b))
-    return zip(*data)
+        data.extend(list(zip(*b)))
+    return list(zip(*data))
 
 
 def create_output(seqs, stags):
@@ -139,9 +139,9 @@ def create_output(seqs, stags):
     Create final output from characters and BMES tags.
     """
     output = []
-    for seq, stag in izip(seqs, stags):
+    for seq, stag in zip(seqs, stags):
         new_sen = []
-        for c, tag in izip(seq, stag):
+        for c, tag in zip(seq, stag):
             new_sen.append(c)
             if tag == 'S' or tag == 'E':
                 new_sen.append('  ')
@@ -165,8 +165,8 @@ def evaluator(data, output_dir, output_flag):
     # Empty words file.
     temp_path = os.path.join(output_dir, '%s.temp' % output_flag)
 
-    ref_file = codecs.open(ref_path, 'w', 'utf8')
-    pred_file = codecs.open(pred_path, 'w', 'utf8')
+    ref_file = codecs.open(ref_path, 'wb', 'utf8')
+    pred_file = codecs.open(pred_path, 'wb', 'utf8')
     for l in create_output(seqs, gold_stags):
         print(l, file=ref_file)
     for i, l in enumerate(create_output(seqs, pred_stags)):
@@ -178,7 +178,7 @@ def evaluator(data, output_dir, output_flag):
     os.system('%s  %s %s %s > %s' % ('./score.perl', temp_path, ref_path, pred_path, score_path))
     # Sighan evaluation results
     os.system('tail -n 7 %s > %s' % (score_path, temp_path))
-    eval_lines = [l.rstrip() for l in codecs.open(temp_path, 'r', 'utf8')]
+    eval_lines = [l.rstrip() for l in codecs.open(temp_path, 'rb', 'utf8')]
     # Remove temp files.
     os.remove(ref_path)
     os.remove(pred_path)

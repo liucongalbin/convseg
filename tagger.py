@@ -5,9 +5,9 @@ import tensorflow.contrib.crf as crf
 import time
 import codecs
 import os
-import cPickle as pickle
+import _pickle as pickle
 import numpy as np
-from itertools import izip
+# from itertools import izip
 
 INT_TYPE = np.int32
 FLOAT_TYPE = np.float32
@@ -58,7 +58,7 @@ class Model(object):
 
         hidden_output = inputs
         pre_channels = inputs.get_shape()[-1].value
-        for i in xrange(hidden_layers):
+        for i in range(hidden_layers):
 
             k = kernel_size
             cur_channels = channels[i]
@@ -197,7 +197,7 @@ class Model(object):
             with tf.variable_scope(self.scope, reuse=True):
                 transitions = tf.get_variable('transitions').eval(session=self.sess)
             paths = np.zeros(scores.shape[:2], dtype=INT_TYPE)
-            for i in xrange(scores.shape[0]):
+            for i in range(scores.shape[0]):
                 tag_score, length = scores[i], sequence_lengths[i]
                 if length == 0:
                     continue
@@ -235,24 +235,24 @@ class Model(object):
         # Load character embeddings.
         pre_trained = {}
         if pre_trained_emb_path and os.path.isfile(pre_trained_emb_path):
-            for l in codecs.open(pre_trained_emb_path, 'r', 'utf8'):
+            for l in codecs.open(pre_trained_emb_path, 'rb', 'utf8'):
                 we = l.split()
                 if len(we) == emb_size + 1:
-                    w, e = we[0], np.array(map(float, we[1:]))
+                    w, e = we[0], np.array(list(map(float, we[1:])))
                     pre_trained[w] = e
 
         # Load word embeddings.
         pre_trained_word = {}
         if pre_trained_word_emb_path and os.path.isfile(pre_trained_word_emb_path):
-            for l in codecs.open(pre_trained_word_emb_path, 'r', 'utf8', 'ignore'):
+            for l in codecs.open(pre_trained_word_emb_path, 'rb', 'utf8', 'ignore'):
                 we = l.split()
                 if len(we) == word_emb_size + 1:
-                    w, e = we[0], np.array(map(float, we[1:]))
+                    w, e = we[0], np.array(list(map(float, we[1:])))
                     pre_trained_word[w] = e
 
         # Load or create mappings.
         if os.path.isfile(mappings_path):
-            item2id, id2item, tag2id, id2tag, word2id, id2word = pickle.load(open(mappings_path, 'r'))
+            item2id, id2item, tag2id, id2tag, word2id, id2word = pickle.load(open(mappings_path, 'rb'))
         else:
             item2id, id2item = create_mapping(create_dic(train_data[0], add_unk=True, add_pad=True))
             tag2id, id2tag = create_mapping(create_dic(train_data[-1]))
@@ -265,7 +265,7 @@ class Model(object):
             for t in test_data[1:-1]:
                 words.extend(t)
             word_dic = create_dic(words, add_unk=True, add_pad=True)
-            for k in word_dic.keys():
+            for k in list(word_dic.keys()):
                 if k not in pre_trained_word and k != '<UNK>' and k != '<PAD>':
                     word_dic.pop(k)
             if reserve_all_word_emb:
@@ -274,7 +274,7 @@ class Model(object):
                         word_dic[w] = 0
             word2id, id2word = create_mapping(word_dic)
             # Save the mappings to disk.
-            pickle.dump((item2id, id2item, tag2id, id2tag, word2id, id2word), open(mappings_path, 'w'))
+            pickle.dump((item2id, id2item, tag2id, id2tag, word2id, id2word), open(mappings_path, 'wb'))
 
         # Hyper parameters.
         word_window_size = len(train_data) - 2
@@ -298,11 +298,11 @@ class Model(object):
         }
 
         if os.path.isfile(parameters_path):
-            parameters_old = pickle.load(open(parameters_path, 'r'))
+            parameters_old = pickle.load(open(parameters_path, 'rb'))
             if parameters != parameters_old:
                 raise Exception('Network parameters are not consistent!')
         else:
-            pickle.dump(parameters, open(parameters_path, 'w'))
+            pickle.dump(parameters, open(parameters_path, 'wb'))
 
         self.item2id = item2id
         self.id2item = id2item
@@ -415,7 +415,7 @@ class Model(object):
                              self.seq_lengths_pl: seq_lengths.astype(INT_TYPE),
                              self.is_train_pl: True}
                 assert len(self.seq_other_ids_pls) == len(seq_other_ids_list)
-                for pl, v in zip(self.seq_other_ids_pls, seq_other_ids_list):
+                for pl, v in list(zip(self.seq_other_ids_pls, seq_other_ids_list)):
                     feed_dict[pl] = v
                 # feed_dict.update(drop_feed_dict)  # enable noise input
                 loss, summaries, grads_summaries, _ = self.sess.run(
@@ -468,7 +468,7 @@ class Model(object):
         mappings_path = os.path.join(model_dir, 'mappings.pkl')
         parameters_path = os.path.join(model_dir, 'parameters.pkl')
         item2id, id2item, tag2id, id2tag, word2id, id2word = \
-            pickle.load(open(mappings_path, 'r'))
+            pickle.load(open(mappings_path, 'rb'))
         parameters = pickle.load(open(parameters_path))
 
         self.item2id = item2id
@@ -510,21 +510,21 @@ class Model(object):
             feed_dict = {self.seq_ids_pl: seq_ids.astype(INT_TYPE),
                          self.seq_lengths_pl: seq_lengths.astype(INT_TYPE),
                          self.is_train_pl: False}
-            for pl, v in zip(self.seq_other_ids_pls, seq_other_ids_list):
+            for pl, v in list(zip(self.seq_other_ids_pls, seq_other_ids_list)):
                 feed_dict[pl] = v.astype(INT_TYPE)
             scores = self.sess.run(self.scores_op, feed_dict)
             stag_ids = self.inference(scores, seq_lengths)
-            for seq, stag_id, length in izip(data[0], stag_ids, seq_lengths):
+            for seq, stag_id, length in list(zip(data[0], stag_ids, seq_lengths)):
                 output.append((seq, [self.id2tag[t] for t in stag_id[:length]]))
-            yield zip(*output)
+            yield list(zip(*output))
             output = []
 
     def tag_all(self, data, batch_size):
         data_iter = data_iterator(data, batch_size=batch_size, shuffle=False)
         output = []
         for b in self.tag(data_iter):
-            output.extend(zip(*b))
-        return zip(*output)
+            output.extend(list(zip(*b)))
+        return list(zip(*output))
 
 
 ################################################################################
@@ -578,7 +578,7 @@ def create_input(batch):
     ret = []
     for d in batch:
         dd = []
-        for seq_id, pos in izip(d, lengths):
+        for seq_id, pos in list(zip(d, lengths)):
             assert len(seq_id) == pos
             pad = [0] * (max_len - pos)
             dd.append(seq_id + pad)
@@ -600,7 +600,7 @@ def data_to_ids(data, mappings):
                 inside_code = 32
             elif 65281 <= inside_code <= 65374:
                 inside_code -= 65248
-            rstring += unichr(inside_code)
+            rstring += chr(inside_code)
         return rstring
 
     def strB2Q(ustring):
@@ -611,7 +611,7 @@ def data_to_ids(data, mappings):
                 inside_code = 12288
             elif 32 <= inside_code <= 126:
                 inside_code += 65248
-            rstring += unichr(inside_code)
+            rstring += chr(inside_code)
         return rstring
 
     def map(item, mapping):
@@ -629,7 +629,7 @@ def data_to_ids(data, mappings):
         return [[map(item, mapping) for item in seq] for seq in seqs]
 
     ret = []
-    for d, m in izip(data, mappings):
+    for d, m in list(zip(data, mappings)):
         ret.append(map_seq(d, m))
     return tuple(ret)
 
@@ -640,7 +640,7 @@ def data_iterator(inputs, batch_size, shuffle=True, max_length=200):
     """
     assert len(inputs) > 0
     assert all([len(item) == len(inputs[0]) for item in inputs])
-    inputs = zip(*inputs)
+    inputs = list(zip(*inputs))
     if shuffle:
         np.random.shuffle(inputs)
 
@@ -652,11 +652,11 @@ def data_iterator(inputs, batch_size, shuffle=True, max_length=200):
         if len(batch) < bs:
             batch.append(d)
         else:
-            yield zip(*batch)
+            yield list(zip(*batch))
             batch = [d]
             if len(d[0]) < max_length:
                 bs = batch_size
             else:
                 bs = max(1, batch_size * max_length / len(d[0]))
     if batch:
-        yield zip(*batch)
+        yield list(zip(*batch))
